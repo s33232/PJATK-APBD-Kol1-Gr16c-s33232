@@ -1,0 +1,17 @@
+{
+   "name": "Apple",
+   "products": [
+      {
+         "name": "iPad Air",
+         "description":"Tablet Apple średniej klasy",
+         "strickerPrice":3499.00,
+         "type": "Tablet"
+      },
+      {
+         "name":"iPhone 15",
+         "description":"Smartfon Apple najnowszej generacji",
+         "strickerPrice":4999.99,
+         "type": "Smartphone"
+      }
+   ]
+}

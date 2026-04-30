@@ -1,0 +1,48 @@
+{
+   "id":1,
+   "name":"Apple",
+   "products":[
+      {
+         "id":1,
+         "name":"iPhone 15",
+         "description":"Smartfon Apple najnowszej generacji",
+         "strickerPrice":4999.99,
+         "productType":{
+            "id":1,
+            "name":"Smartphone"
+         },
+         "vendors":[
+            {
+               "code":"VEND000001",
+               "name":"Amazon Polska",
+               "amount":50,
+               "pricePerUnit":4899.99
+            },
+            {
+               "code":"VEND000002",
+               "name":"x-kom",
+               "amount":30,
+               "pricePerUnit":4950.00
+            }
+         ]
+      },
+      {
+         "id":5,
+         "name":"iPad Air",
+         "description":"Tablet Apple średniej klasy",
+         "strickerPrice":3499.00,
+         "productType":{
+            "id":4,
+            "name":"Tablet"
+         },
+         "vendors":[
+            {
+               "code":"VEND000001",
+               "name":"Amazon Polska",
+               "amount":60,
+               "pricePerUnit":3399.00
+            }
+         ]
+      }
+   ]
+}
