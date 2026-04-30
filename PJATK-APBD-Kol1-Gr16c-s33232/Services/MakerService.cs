@@ -1,9 +1,8 @@
-namespace PJATK_APBD_Kol1_Gr16c_s33232.Services;
-
 using PJATK_APBD_Kol1_Gr16c_s33232.DTOs;
 using PJATK_APBD_Kol1_Gr16c_s33232.Exceptions;
 using Microsoft.Data.SqlClient;
 
+namespace PJATK_APBD_Kol1_Gr16c_s33232.Services;
 
 public class MakerService(IConfiguration config) : IMakerService
 {
@@ -11,6 +10,7 @@ public class MakerService(IConfiguration config) : IMakerService
 
     public async Task<GetMakerDto> GetMakerAsync(int id)
     {
+
         await using var conn = new SqlConnection(_cs);
         await conn.OpenAsync();
         
@@ -78,6 +78,51 @@ public class MakerService(IConfiguration config) : IMakerService
 
         return maker;
     }
-    
-    public Task AddMakerAsync(PostMakerDto dto) => throw new NotImplementedException();
+
+    public async Task AddMakerAsync(PostMakerDto dto)
+    {
+        await using var conn = new SqlConnection(_cs);
+        await conn.OpenAsync();
+        await using var tx = await conn.BeginTransactionAsync();
+
+        try
+        {
+            await using var cmdMaker = new SqlCommand(
+                "INSERT INTO Makers (Name) OUTPUT INSERTED.Id VALUES (@Name)", 
+                conn, (SqlTransaction)tx);
+            cmdMaker.Parameters.AddWithValue("@Name", dto.Name);
+            
+            var makerId = (int)await cmdMaker.ExecuteScalarAsync()!;
+
+            foreach (var p in dto.Products)
+            {
+                await using var cmdProduct = new SqlCommand("""
+                    DECLARE @PtId INT = (SELECT Id FROM ProductTypes WHERE Name = @Type);
+                    IF @PtId IS NULL 
+                    BEGIN
+                        INSERT INTO ProductTypes (Name) VALUES (@Type);
+                        SET @PtId = SCOPE_IDENTITY();
+                    END
+                    
+                    INSERT INTO Products (Name, Description, StickerPrice, ProductTypeId, MakerId)
+                    VALUES (@PName, @PDesc, @Price, @PtId, @MakerId);
+                    """, conn, (SqlTransaction)tx);
+
+                cmdProduct.Parameters.AddWithValue("@Type", p.Type);
+                cmdProduct.Parameters.AddWithValue("@PName", p.Name);
+                cmdProduct.Parameters.AddWithValue("@PDesc", (object?)p.Description ?? DBNull.Value);
+                cmdProduct.Parameters.AddWithValue("@Price", p.StrickerPrice);
+                cmdProduct.Parameters.AddWithValue("@MakerId", makerId);
+
+                await cmdProduct.ExecuteNonQueryAsync();
+            }
+
+            await tx.CommitAsync();
+        }
+        catch
+        {
+            await tx.RollbackAsync();
+            throw;
+        }
+    }
 }
